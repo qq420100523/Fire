@@ -42,7 +42,11 @@
 
 <img width="540" alt="screenshot-10" src="./assets/10.png">
 
+<img width="540" alt="screenshot-11" src="./assets/11.png">
 
+<img width="540" alt="screenshot-12" src="./assets/12.png">
+
+<img width="540" alt="screenshot-13" src="./assets/13.png">
 
 ## 功能
 1. 五笔输入(支持86版/98版/自定义编码方案)
@@ -69,7 +73,7 @@
 ## 二次开发说明
 全面重构偏好设置系统、候选窗口、码表引擎和主题编辑器
 
-- **偏好设置**：移除 Settings SPM 依赖，迁移至原生 SwiftUI，实现 macOS 26 Tahoe的新界面风格 **“Liquid Glass”**
+- **偏好设置**：移除 Settings SPM 依赖，迁移至原生 SwiftUI，实现 macOS 26 Tahoe的新界面风格 **“Liquid Glass”**侧栏窗口布局
 - **候选窗口**：添加鼠标悬停选中点击上屏、方向键移动选中项、毛玻璃背景、选中项背景高亮
 - **主题系统**：新增内置主题编辑器支持实时预览、支持导入多主题管理
 - **码表引擎**：新增精确匹配、生僻字过滤、增加五笔拆字(86/98/06)和拼音音调提示，拆字提示支持用户词；删除候选码改为屏蔽机制。
