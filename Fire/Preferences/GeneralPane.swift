@@ -35,6 +35,7 @@ struct GeneralPane: View {
     @Default(.spellingScheme) private var spellingScheme
     @Default(.chineseOutputMode) private var chineseOutputMode
     @Default(.enableExactMatch) private var enableExactMatch
+    @Default(.celebrationEffect) private var celebrationEffect
 
     var body: some View {
         Form {
@@ -140,6 +141,22 @@ struct GeneralPane: View {
                         Text("禁用").tag(ExtraCandidateSelectKeys.disabled)
                         Text(";'").tag(ExtraCandidateSelectKeys.semicolonQuote)
                         Text(",.").tag(ExtraCandidateSelectKeys.commaPeriod)
+                    }
+                    .labelsHidden()
+                }
+                LabeledContent("上屏庆祝效果") {
+                    Picker("", selection: $celebrationEffect) {
+                        Text("不显示").tag(CelebrationEffectType.none)
+                        Text("鲜花").tag(CelebrationEffectType.flowers)
+                        Text("星星").tag(CelebrationEffectType.stars)
+                        Text("气球").tag(CelebrationEffectType.balloons)
+                        Text("泡泡").tag(CelebrationEffectType.bubbles)
+                        Text("喷火").tag(CelebrationEffectType.fireBlast)
+                        Text("爱心").tag(CelebrationEffectType.hearts)
+                        Text("蝴蝶").tag(CelebrationEffectType.butterflies)
+                        Text("音符").tag(CelebrationEffectType.notes)
+                        Text("彩纸").tag(CelebrationEffectType.paper)
+                        Text("鸡蛋").tag(CelebrationEffectType.egg)
                     }
                     .labelsHidden()
                 }

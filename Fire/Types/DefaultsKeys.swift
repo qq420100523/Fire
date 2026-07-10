@@ -16,6 +16,21 @@ enum PunctuationMode: Codable, Defaults.Serializable {
     case custom   // 自定义
 }
 
+// 上屏庆祝效果类型
+enum CelebrationEffectType: String, Codable, Defaults.Serializable {
+    case none     // 不显示
+    case flowers  // 鲜花
+    case stars    // 星星
+    case balloons // 气球
+    case bubbles  // 泡泡
+    case fireBlast // 喷火
+    case hearts   // 爱心
+    case butterflies // 蝴蝶
+    case notes    // 音符
+    case paper    // 彩纸
+    case egg      // 鸡蛋
+}
+
 extension Defaults.Keys {
     static let zKeyQuery = Key<Bool>("zKeyQuery", default: true)
     static let candidatesDirection = Key<CandidatesDirection>("candidatesDirection", default: .horizontal)
@@ -52,4 +67,5 @@ extension Defaults.Keys {
     static let chineseOutputMode = Key<ChineseOutputMode>("chineseOutputMode", default: .simplified)
     static let enableExactMatch = Key<Bool>("enableExactMatch", default: false)
     static let enableStatistics = Key<Bool>("enableStatistics", default: true)
+    static let celebrationEffect = Key<CelebrationEffectType>("celebrationEffect", default: .none)
 }

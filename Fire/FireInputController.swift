@@ -695,7 +695,17 @@ class FireInputController: IMKInputController {
                 Fire.shared.recentCommittedTexts.removeFirst()
             }
         }
+
+        // 获取光标位置（参考 TipsWindow 定位方式）
+        let cursorPoint = getOriginPoint()
+
         insertText(candidate.text)
+
+        // 中文上屏时触发庆祝动画
+        if candidate.type != .placeholder, candidate.text.contains(where: { $0.isChineseChar }) {
+            Defaults[.celebrationEffect].show(at: cursorPoint)
+        }
+
         let notification = Notification(
             name: Fire.candidateInserted,
             object: nil,
