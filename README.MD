@@ -22,19 +22,25 @@
 
 ## 截图
 
-<img width="529" alt="image" src="https://user-images.githubusercontent.com/9018466/181672239-826e2f48-ce58-434a-9e05-6c58fcb8a5c8.png">
+<img width="540" alt="screenshot-1" src="./assets/1.png">
 
-<img width="549" alt="image" src="https://user-images.githubusercontent.com/9018466/181672303-345e30f9-dfa6-4562-828f-6e5e8d87166a.png">
+<img width="540" alt="screenshot-2" src="./assets/2.png">
 
-<img width="545" alt="image" src="https://user-images.githubusercontent.com/9018466/181672403-f5372465-ccc5-4b7b-befb-47c913278d8b.png">
+<img width="540" alt="screenshot-3" src="./assets/3.png">
 
-<img width="557" alt="image" src="https://user-images.githubusercontent.com/9018466/181672445-0b8c2e1f-2105-4629-8b62-fe46001ebcec.png">
+<img width="540" alt="screenshot-4" src="./assets/4.png">
 
-<img width="556" alt="image" src="https://user-images.githubusercontent.com/9018466/181672510-8827fead-7a39-450a-bf62-4a129c9dc82d.png">
+<img width="540" alt="screenshot-5" src="./assets/5.png">
 
-<img width="540" alt="image" src="https://user-images.githubusercontent.com/9018466/181672573-9645e5fc-0092-4ff6-8b88-cd8e77d78453.png">
+<img width="540" alt="screenshot-6" src="./assets/6.png">
 
-<img width="540" alt="image" src="https://user-images.githubusercontent.com/9018466/181672627-4ab5b3c4-6d22-4bdc-93e5-a80570c24ef1.png">
+<img width="540" alt="screenshot-7" src="./assets/7.png">
+
+<img width="540" alt="screenshot-8" src="./assets/8.png">
+
+<img width="540" alt="screenshot-9" src="./assets/9.png">
+
+<img width="540" alt="screenshot-10" src="./assets/10.png">
 
 
 
@@ -42,21 +48,36 @@
 1. 五笔输入(支持86版/98版/自定义编码方案)
 2. 五笔拼音混输，支持编码提示
 3. 纯拼音输入
-3. -/+/向上/向下键支持翻页
-4. z键查询
-5. 候选词横向/竖向排列支持
-6. 候选词数量可配置
-7. 候选窗口显示输入编码
-8. 应用输入模式切换
-9. 支持手动调整候选词顺序(`control` + `数字`)
-10. 支持用户词库
-11. 支持自定义符号
-12. 支持自定义主题
-13. 支持数据统计
-14. 支持临时英文模式(在中文输入模式下，按;键可以开启临时英文模式，输入英文字符和半角符号)
-15. 快速组词(连续输入多个单字或词后，按`control` + `=`可将最近的输入自动组合成新词)
-16. 快速删除候选词(`control` + `shift` + `数字`将对应候选词从词库删除)
-17. 命令行
+4. -/+/向上/向下键支持翻页
+5. z键查询
+6. 候选词横向/竖向排列支持
+7. 候选词数量可配置
+8. 候选窗口显示输入编码
+9. 应用输入模式切换
+10. 支持手动调整候选词顺序(`control` + `数字`)
+11. 支持用户词库
+12. 支持自定义符号
+13. 支持自定义主题
+14. 支持数据统计
+15. 支持临时英文模式(在中文输入模式下，按;键可以开启临时英文模式，输入英文字符和半角符号)
+16. 快速组词(连续输入多个单字或词后，按`control` + `=`可将最近的输入自动组合成新词)
+17. 快速删除候选词(`control` + `shift` + `数字`将对应候选词从词库删除)
+18. 命令行
+
+===========
+
+## 二次开发说明
+全面重构偏好设置系统、候选窗口、码表引擎和主题编辑器
+
+- **偏好设置**：移除 Settings SPM 依赖，迁移至原生 SwiftUI，实现 macOS 26 Tahoe的新界面风格 **“Liquid Glass”**
+- **候选窗口**：添加鼠标悬停选中点击上屏、方向键移动选中项、毛玻璃背景、选中项背景高亮
+- **主题系统**：新增内置主题编辑器支持实时预览、支持导入多主题管理
+- **码表引擎**：新增精确匹配、生僻字过滤、增加五笔拆字(86/98/06)和拼音音调提示，拆字提示支持用户词；删除候选码改为屏蔽机制。
+- **打字统计**：新增平均码长统计
+- **输入处理**：新增第五码顶字上屏
+- **码表构建**：五笔拆字注入，支持多字词组合拆字预计算
+- **新功能**：新增五笔字根表查看(86/98/06)
+- **上屏庆祝特效**：新增候选词上屏时，触发选定的庆祝效果，支持多种庆祝粒子动画（鲜花、星星、气球、泡泡、喷火、爱心、蝴蝶、音符、彩纸、鸡蛋
 
 ## 命令行使用
 
@@ -72,7 +93,7 @@
 ```
 
 ## 安装
-> [下载地址](https://github.com/qwertyyb/Fire/releases)
+> [下载地址](https://github.com/qq420100523/Fire/releases)
 
 1. 下载 `FireInstall.pkg` 文件到本地
 
@@ -90,7 +111,7 @@
 ## 开发
 ```bash
 # 下载项目到本地
-git clone --recursive https://github.com/qwertyyb/Fire.git
+git clone --recursive https://github.com/qq420100523/Fire.git
 
 # 构建 sqlcipher
 ./scripts/0_prepare_sqlcipher.sh
@@ -105,3 +126,13 @@ sudo chmod -R 777 /Library/Input Methods
 
 ## License
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Fqwertyyb%2FFire.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Fqwertyyb%2FFire?ref=badge_large)
+
+## 致谢
+
+本项目基于 [qwertyyb/Fire](https://github.com/qwertyyb/Fire) 进行二次开发。
+
+衷心感谢原作者 **qwertyyb** 的开源分享和多年来的持续维护，业火五笔输入法是目前 macOS 平台上优秀的五笔输入法之一，其代码质量和功能设计让我受益匪浅。
+
+本人初次尝试二次开发与开源，若有任何不符合开源精神的疏漏或不当之处，恳请原作者和社区不吝指正，我会虚心学习并及时修正。
+
+再次感谢开源社区每一位贡献者的无私付出，让知识得以共享，让技术不断进步。
