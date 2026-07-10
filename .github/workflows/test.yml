@@ -27,7 +27,7 @@ jobs:
       USE_CODE_SIGN: disable
     
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         submodules: true
 
@@ -35,14 +35,16 @@ jobs:
     #   run: sudo xcode-select --switch /Applications/Xcode_14.3.1.app
     
     - name: import application certificate
+      if: env.USE_CODE_SIGN == 'enable'
       id: keychain
-      uses: apple-actions/import-codesign-certs@v2
+      uses: apple-actions/import-codesign-certs@v7
       with: 
         p12-file-base64: ${{ secrets.CERTIFICATES_P12 }}
         p12-password: ${{ secrets.CERTIFICATES_P12_PASSWORD }}
 
     - name: import installer certificate
-      uses: apple-actions/import-codesign-certs@v2
+      if: env.USE_CODE_SIGN == 'enable'
+      uses: apple-actions/import-codesign-certs@v7
       with:
         create-keychain: false
         keychain-password: ${{ steps.keychain.outputs.keychain-password }}
@@ -61,9 +63,15 @@ jobs:
     - name: generate appcast.xml
       env:
         sparkle_key: ${{ secrets.sparkle_key }}
-      run: ./scripts/d_build_appcast.sh
+      run: |
+        if [ -z "$sparkle_key" ]; then
+          echo "sparkle_key 未设置，跳过 appcast 生成（fork 或非发布构建）"
+          mkdir -p "${{ github.workspace }}/dist"
+          exit 0
+        fi
+        ./scripts/d_build_appcast.sh
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
         name: dist
         path: ./dist/

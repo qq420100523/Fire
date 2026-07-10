@@ -40,7 +40,7 @@ jobs:
       changelog: ${{ github.event_name == 'workflow_dispatch' && inputs.release_notes || steps.changelog.outputs.clean_changelog }}
       ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || steps.checkout.outputs.ref }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         id: checkout
         if: github.event_name != 'workflow_dispatch' || inputs.release_notes == ''
         with:
@@ -49,7 +49,7 @@ jobs:
       - name: Conventional Changelog Action
         id: changelog
         if: github.event_name != 'workflow_dispatch' || inputs.release_notes == ''
-        uses: TriPSs/conventional-changelog-action@v3
+        uses: TriPSs/conventional-changelog-action@v6
         with:
           github-token: ${{ secrets.github_token }}
           skip-commit: "true"
@@ -87,7 +87,7 @@ jobs:
     if: needs.changelog.outputs.skipped == 'false'
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
       with:
         submodules: true
         ref: ${{ needs.changelog.outputs.ref }}
@@ -96,14 +96,16 @@ jobs:
     #   run: sudo xcode-select --switch /Applications/Xcode_14.3.1.app
     
     - name: import application certificate
+      if: env.USE_CODE_SIGN == 'enable'
       id: keychain
-      uses: apple-actions/import-codesign-certs@v2
+      uses: apple-actions/import-codesign-certs@v7
       with: 
         p12-file-base64: ${{ secrets.CERTIFICATES_P12 }}
         p12-password: ${{ secrets.CERTIFICATES_P12_PASSWORD }}
 
     - name: import installer certificate
-      uses: apple-actions/import-codesign-certs@v2
+      if: env.USE_CODE_SIGN == 'enable'
+      uses: apple-actions/import-codesign-certs@v7
       with:
         create-keychain: false
         keychain-password: ${{ steps.keychain.outputs.keychain-password }}
@@ -120,6 +122,7 @@ jobs:
       run: ./scripts/b_build_installer.sh
 
     - name: notarize FireInstaller.pkg
+      if: env.USE_CODE_SIGN == 'enable'
       env:
         apple_id: ${{ secrets.APPLE_ID }}
         apple_id_password: ${{ secrets.APPLE_ID_PASSWORD }}
@@ -130,82 +133,67 @@ jobs:
       env:
         sparkle_key: ${{ secrets.sparkle_key }}
         update_notes: ${{ needs.changelog.outputs.changelog_html }}
-      run: ./scripts/d_build_appcast.sh
+      run: |
+        if [ -z "$sparkle_key" ]; then
+          echo "sparkle_key 未设置，跳过 appcast 生成"
+          mkdir -p "${{ github.workspace }}/dist"
+          exit 0
+        fi
+        ./scripts/d_build_appcast.sh
 
     - name: gather artifact
       run: cp ./Fire/Info.plist ./dist/
 
-    - uses: actions/upload-artifact@v4
+    - uses: actions/upload-artifact@v7
       with:
-        name: dist
-        path: ./dist/
+        name: installer
+        path: ./dist/FireInstaller.pkg
         retention-days: 7
 
   create_release:
     runs-on: ubuntu-latest
     needs: [changelog, build_binary]
-    environment: release
     permissions:
-      contents: write # 创建 release 需要此权限
+      contents: write
 
     if: needs.changelog.outputs.skipped == 'false'
-    
+
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
+          ref: ${{ needs.changelog.outputs.ref }}
           submodules: false
-          ref: gh-pages
 
-      - name: Create Release
-        uses: actions/create-release@v1
-        id: create_release
-        env:
-          GITHUB_TOKEN: ${{ secrets.github_token }}
+      - uses: actions/download-artifact@v8
         with:
-          tag_name: ${{ needs.changelog.outputs.next_version }}
-          release_name: ${{ needs.changelog.outputs.next_version }}
-          body: ${{ needs.changelog.outputs.changelog }}
-
-      - uses: actions/download-artifact@v4
-        with:
-          name: dist
+          name: installer
           path: ./dist
 
-      - name: Upload Release Asset(installer.pkg)
-        uses: actions/upload-release-asset@v1
+      - name: Create Release & Upload Assets
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/FireInstaller.pkg
-          asset_name: FireInstaller.pkg
-          asset_content_type: application/octet-stream
+          tag_name: ${{ needs.changelog.outputs.next_version }}
+          name: ${{ needs.changelog.outputs.next_version }}
+          body: ${{ needs.changelog.outputs.changelog }}
+          files: |
+            ./dist/FireInstaller.pkg
 
-      - name: Upload Release Asset(installer.zip)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/FireInstaller.zip
-          asset_name: FireInstaller.zip
-          asset_content_type: application/zip
-
-      - name: Upload Release Asset(Fire.zip)
-        uses: actions/upload-release-asset@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ./dist/Fire.zip
-          asset_name: Fire.zip
-          asset_content_type: application/zip
-
-      - name: commit appcast.xml to gh-pages branch
+      - name: deploy appcast to gh-pages
+        if: github.ref_name == 'dev' && github.event_name == 'workflow_dispatch'
         run: |
-          git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
-          mv dist/appcast.xml ./appcast.xml
-          git add appcast.xml
-          git commit -m "feat: 更新appcast.xml ${{ needs.changelog.outputs.next_version }} build ${{ needs.changelog.outputs.ref }}"
-          git push origin gh-pages
+          if git ls-remote --exit-code origin gh-pages > /dev/null 2>&1; then
+            git fetch origin gh-pages
+            git checkout gh-pages
+            if [ -f dist/appcast.xml ]; then
+              mv dist/appcast.xml ./appcast.xml
+              git config --local user.email "action@github.com"
+              git config --local user.name "GitHub Action"
+              git add appcast.xml
+              git commit -m "feat: 更新appcast.xml ${{ needs.changelog.outputs.next_version }} build ${{ needs.changelog.outputs.ref }}"
+              git push origin gh-pages
+            fi
+          else
+            echo "gh-pages not found, skip appcast deploy"
+          fi
