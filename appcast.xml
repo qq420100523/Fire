@@ -1,0 +1,18 @@
+<?xml version="1.0" standalone="yes"?>
+<rss xmlns:sparkle="http://www.andymatuschak.org/xml-namespaces/sparkle" version="2.0">
+    <channel>
+        <title>业火输入法</title>
+        <item>
+            <title>v0.17.2</title>
+            <pubDate>$(date -R)</pubDate>
+            <sparkle:minimumSystemVersion>11.0</sparkle:minimumSystemVersion>
+            <description><![CDATA[]]></description>
+            <enclosure url="https://github.com/qq420100523/Fire/releases/latest/download/FireInstaller.zip"
+              sparkle:version="1"
+              sparkle:shortVersionString="v0.17.2"
+              length="0"
+              sparkle:edSignature=""
+              type="application/octet-stream"/>
+        </item>
+    </channel>
+</rss>
