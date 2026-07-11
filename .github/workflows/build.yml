@@ -45,6 +45,7 @@ jobs:
         if: github.event_name != 'workflow_dispatch' || inputs.release_notes == ''
         with:
           submodules: false
+          fetch-depth: 0
 
       - name: Conventional Changelog Action
         id: changelog
