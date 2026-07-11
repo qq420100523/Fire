@@ -31,13 +31,13 @@ jobs:
   changelog:
     runs-on: ubuntu-latest
     permissions:
-      contents: write # 创建 release 需要此权限
+      contents: write
     if: github.event.pull_request.merged == true && github.event.pull_request.base.ref == 'master' || github.event_name == 'workflow_dispatch'
     outputs:
       skipped: ${{ github.event_name == 'workflow_dispatch' && 'false' || steps.changelog.outputs.skipped }}
       next_version: ${{ github.event_name == 'workflow_dispatch' && inputs.version || steps.changelog.outputs.tag }}
       changelog_html: ${{ steps.create_html.outputs.html }}
-      changelog: ${{ github.event_name == 'workflow_dispatch' && inputs.release_notes || steps.changelog.outputs.clean_changelog }}
+      changelog: ${{ github.event_name == 'workflow_dispatch' && inputs.release_notes || (github.event_name == 'workflow_dispatch' && steps.gitlog.outputs.changelog || steps.changelog.outputs.clean_changelog) }}
       ref: ${{ github.event_name == 'workflow_dispatch' && inputs.ref || steps.checkout.outputs.ref }}
     steps:
       - uses: actions/checkout@v7
@@ -51,14 +51,25 @@ jobs:
         if: github.event_name != 'workflow_dispatch' || inputs.release_notes == ''
         uses: TriPSs/conventional-changelog-action@v6
         with:
-          github-token: ${{ secrets.github_token }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           skip-commit: "true"
           output-file: "false"
+
+      - name: Generate changelog from git log
+        id: gitlog
+        if: github.event_name == 'workflow_dispatch' && inputs.release_notes == ''
+        run: |
+          FROM="$(git describe --tags --abbrev=0 2>/dev/null || git rev-list --max-parents=0 HEAD)"
+          {
+            echo 'changelog<<EOF'
+            git log --oneline "$FROM..HEAD" | grep -E '^[a-f0-9]+ (feat|fix)' | sed -E 's/^[a-f0-9]+ /- /' || echo "- 无显著变更"
+            echo 'EOF'
+          } >> "$GITHUB_OUTPUT"
       
       - name: combine donation and changelog
         id: combine_text
         env:
-          CHANGELOG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_notes || steps.changelog.outputs.clean_changelog }}
+          CHANGELOG: ${{ github.event_name == 'workflow_dispatch' && inputs.release_notes || (github.event_name == 'workflow_dispatch' && steps.gitlog.outputs.changelog || steps.changelog.outputs.clean_changelog) }}
         run: |
           {
             echo "text<<ENDOFTEXT"
@@ -183,7 +194,7 @@ jobs:
       - name: deploy appcast to gh-pages
         if: github.ref_name == 'dev' && github.event_name == 'workflow_dispatch'
         run: |
-          if git ls-remote --exit-code origin gh-pages > /dev/null 2>&1; then
+          if git ls-remote --exit-code origin gh-pages >/dev/null 2>&1; then
             git fetch origin gh-pages
             git checkout gh-pages
             if [ -f dist/appcast.xml ]; then
