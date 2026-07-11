@@ -186,8 +186,8 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          tag_name: ${{ github.ref_name == 'dev' && format('{0}-alpha', needs.changelog.outputs.next_version) || needs.changelog.outputs.next_version }}
-          name: ${{ github.ref_name == 'dev' && format('{0}-alpha', needs.changelog.outputs.next_version) || needs.changelog.outputs.next_version }}
+          tag_name: ${{ github.ref_name == 'dev' && format('{0}-dev', needs.changelog.outputs.next_version) || needs.changelog.outputs.next_version }}
+          name: ${{ github.ref_name == 'dev' && format('{0}-dev', needs.changelog.outputs.next_version) || needs.changelog.outputs.next_version }}
           body: ${{ needs.changelog.outputs.changelog }}
           prerelease: ${{ github.ref_name == 'dev' }}
           files: |
