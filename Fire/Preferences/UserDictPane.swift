@@ -8,6 +8,7 @@
 
 import SwiftUI
 import Combine
+import Defaults
 
 /// 用户词表的一行数据
 struct UserDictRow: Identifiable, Equatable {
@@ -23,6 +24,7 @@ struct UserDictRow: Identifiable, Equatable {
 // MARK: - 偏好设置面板
 
 struct UserDictPane: View {
+    @Default(.hotkeyModifier) private var hotkeyModifier
     @State private var rows: [UserDictRow] = []
     @State private var savedSnapshot: [UserDictRow] = []
     @State private var showAlert = false
@@ -31,51 +33,27 @@ struct UserDictPane: View {
     @State private var confirmDeleteRow: Int?
     @State private var isModified = false
 
-    /// 按键帽样式：可选 SF Symbol 图标 + 标签文字
-    @ViewBuilder
-    private func keyCap(_ title: String, icon: String? = nil) -> some View {
-        Group {
-            if let icon = icon {
-                HStack(spacing: 2) {
-                    Image(systemName: icon)
-                        .font(.caption2)
-                    Text(title)
-                        .font(.caption2)
-                        .fontWeight(.medium)
-                }
-            } else {
-                Text(title)
-                    .font(.caption2)
-                    .fontWeight(.medium)
-            }
-        }
-        .padding(.horizontal, 5)
-        .padding(.vertical, 2)
-        .background(Color(.sRGB, red: 0.5, green: 0.5, blue: 0.5, opacity: 0.2))
-        .cornerRadius(3)
-    }
-
     var body: some View {
         Form {
             Section {
                 // 快捷键说明
                 VStack(alignment: .leading, spacing: 6) {
                     HStack(spacing: 6) {
-                        keyCap("control", icon: "chevron.up")
+                        KeyCap(hotkeyModifier.rawValue, icon: hotkeyIcon)
                         Text("+")
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
-                        keyCap("=")
+                        KeyCap("=")
                         Text("引导快速组合新词并置顶")
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
                     }
                     HStack(spacing: 6) {
-                        keyCap("control", icon: "chevron.up")
+                        KeyCap(hotkeyModifier.rawValue, icon: hotkeyIcon)
                         Text("+")
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
-                        keyCap("N")
+                        KeyCap("N")
                         Text("手动调整候选词顺序（置顶）")
                             .font(.caption2)
                             .foregroundStyle(.tertiary)
@@ -228,15 +206,15 @@ struct UserDictPane: View {
                 HStack {
                     VStack(alignment: .leading, spacing: 6) {
                         HStack(spacing: 6) {
-                            keyCap("control", icon: "chevron.up")
+                            KeyCap(hotkeyModifier.rawValue, icon: hotkeyIcon)
                             Text("+")
                                 .font(.caption2)
                                 .foregroundStyle(.tertiary)
-                            keyCap("shift", icon: "shift")
+                            KeyCap("shift", icon: "shift")
                             Text("+")
                                 .font(.caption2)
                                 .foregroundStyle(.tertiary)
-                            keyCap("N")
+                            KeyCap("N")
                             Text("将对应候选词移除（对码表词屏蔽，对用户词删除并屏蔽）")
                                 .font(.caption2)
                                 .foregroundStyle(.tertiary)
@@ -292,6 +270,14 @@ struct UserDictPane: View {
         }
         .onChange(of: rows) { _, _ in
             isModified = (rows != savedSnapshot)
+        }
+    }
+
+    private var hotkeyIcon: String {
+        switch hotkeyModifier {
+        case .control: return "chevron.up"
+        case .option: return "option"
+        case .command: return "command"
         }
     }
 

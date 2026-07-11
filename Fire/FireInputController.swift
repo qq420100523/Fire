@@ -121,7 +121,11 @@ class FireInputController: IMKInputController {
         if event.type == .flagsChanged {
             return nil
         }
-        // Ctrl+Shift+数字：从词库删除对应候选词
+
+        let hotkeyMod = Defaults[.hotkeyModifier]
+        let hotkeyFlag = hotkeyMod.nsModifierFlag
+
+        // {hotkey}+Shift+数字：从词库删除对应候选词
         // 按住 Shift 时数字键的 charactersIgnoringModifiers 会变成符号(如 Shift+1 -> !)，
         // 无法用 Int 解析，这里改用 keyCode 映射数字
         let digitByKeyCode: [UInt16: Int] = [
@@ -130,12 +134,13 @@ class FireInputController: IMKInputController {
             UInt16(kVK_ANSI_7): 7, UInt16(kVK_ANSI_8): 8, UInt16(kVK_ANSI_9): 9
         ]
         let modifiers = event.modifierFlags.intersection(.deviceIndependentFlagsMask)
-        if modifiers == [.control, .shift],
+        let deleteModifiers: NSEvent.ModifierFlags = [hotkeyFlag, .shift]
+        if modifiers == deleteModifiers,
            let deleteIndex = digitByKeyCode[event.keyCode],
            deleteIndex <= _candidates.count {
             let target = _candidates[deleteIndex - 1]
             if target.type != .placeholder {
-                NSLog("hotkey: control + shift + \(deleteIndex), delete confirm: \(target.text)")
+                NSLog("hotkey: \(hotkeyMod.rawValue) + shift + \(deleteIndex), delete confirm: \(target.text)")
                 if _pendingDeleteCandidate == target {
                     // 再按一次同一组合键 = 确认删除
                     confirmDelete(target)
@@ -147,23 +152,23 @@ class FireInputController: IMKInputController {
             }
             return true
         }
-        // Ctrl+= ：在无正在输入原码时进入"快速加词"组词模式
-        if modifiers == .control, event.keyCode == UInt16(kVK_ANSI_Equal), _originalString.isEmpty {
+        // {hotkey}+= ：在无正在输入原码时进入"快速加词"组词模式
+        if modifiers == hotkeyFlag, event.keyCode == UInt16(kVK_ANSI_Equal), _originalString.isEmpty {
             if Fire.shared.recentCommittedTexts.count >= 2 {
                 _combineCount = 2
                 markCombineText()
                 showCombinePreview()
             } else {
-                Utils.shared.showMessage("请先输入至少两个字，再按 Ctrl+= 组词")
+                Utils.shared.showMessage("请先输入至少两个字，再按 \(hotkeyMod.rawValue)+= 组词")
             }
             return true
         }
         guard let chars = event.charactersIgnoringModifiers, let num = Int(chars) else {
             return nil
         }
-        if event.modifierFlags == .control &&
+        if modifiers == hotkeyFlag &&
             num > 0 && num <= _candidates.count {
-            NSLog("hotkey: control + \(num)")
+            NSLog("hotkey: \(hotkeyMod.rawValue) + \(num)")
             DictManager.shared.setCandidateToFirst(query: _originalString, candidate: _candidates[num-1])
             self.curPage = 1
             self.refreshCandidatesWindow()

@@ -36,6 +36,7 @@ struct GeneralPane: View {
     @Default(.chineseOutputMode) private var chineseOutputMode
     @Default(.enableExactMatch) private var enableExactMatch
     @Default(.celebrationEffect) private var celebrationEffect
+    @Default(.hotkeyModifier) private var hotkeyModifier
 
     var body: some View {
         Form {
@@ -197,8 +198,56 @@ struct GeneralPane: View {
             } header: {
                 Text("中英文切换")
             }
+            Section {
+                LabeledContent("热键修饰键") {
+                    Picker("", selection: $hotkeyModifier) {
+                        Text("Control").tag(HotkeyModifier.control)
+                        Text("Option").tag(HotkeyModifier.option)
+                        Text("Command").tag(HotkeyModifier.command)
+                    }
+                    .labelsHidden()
+                }
+                VStack(alignment: .leading, spacing: 6) {
+                    HStack(spacing: 6) {
+                        KeyCap(hotkeyModifier.rawValue, icon: hotkeyIcon)
+                        Text("+").font(.caption2).foregroundStyle(.tertiary)
+                        KeyCap("数字")
+                        Text("置顶候选词")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+                    HStack(spacing: 6) {
+                        KeyCap(hotkeyModifier.rawValue, icon: hotkeyIcon)
+                        Text("+").font(.caption2).foregroundStyle(.tertiary)
+                        KeyCap("shift", icon: "shift")
+                        Text("+").font(.caption2).foregroundStyle(.tertiary)
+                        KeyCap("数字")
+                        Text("删除候选词")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+                    HStack(spacing: 6) {
+                        KeyCap(hotkeyModifier.rawValue, icon: hotkeyIcon)
+                        Text("+").font(.caption2).foregroundStyle(.tertiary)
+                        KeyCap("=")
+                        Text("快速加词")
+                            .font(.caption2)
+                            .foregroundStyle(.tertiary)
+                    }
+                }
+                .padding(.leading, 4)
+            } header: {
+                Text("热键")
+            }
         }
         .formStyle(.grouped)
+    }
+    private var hotkeyIcon: String {
+        switch hotkeyModifier {
+        case .control: return "chevron.up"
+        case .option: return "option"
+        case .command: return "command"
+        }
     }
 }
 
