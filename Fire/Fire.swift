@@ -7,7 +7,6 @@
 //
 
 import AppKit
-import Defaults
 import InputMethodKit
 import Sparkle
 
@@ -91,30 +90,7 @@ class Fire: NSObject {
             return ([candidate], false)
         }
         let (candidates, hasNext) = DictManager.shared.getCandidates(query: origin, page: page)
-        // 根据用户设置的输出模式对候选词进行实时简繁转换
-        // 使用 CFStringTransform 系统 API 转换，支持 "Hans-Hant"（简→繁）和 "Hant-Hans"（繁→简）
-        let chineseOutputMode = Defaults[.chineseOutputMode]
-        // 不转换时直接返回，跳过转换和去重开销
-        guard chineseOutputMode != .off else {
-            return (candidates, hasNext)
-        }
-        // 使用 CFStringTransform 系统 API 实时简繁转换
-        let transform: String = chineseOutputMode == .simplifiedToTraditional
-            ? "Hans-Hant"  // 简→繁
-            : "Hant-Hans"  // 繁→简
-        var transformed = candidates.map { (candidate) -> Candidate in
-            let mutableStr = NSMutableString(string: candidate.text)
-            CFStringTransform(mutableStr, nil, transform as CFString, false)
-            let text = mutableStr as String
-            // 同时传递拆字(spelling)和拼音(pinyin)数据，供候选提示模式使用
-            return Candidate(code: candidate.code, text: text, type: candidate.type,
-                              spelling: candidate.spelling, pinyin: candidate.pinyin)
-        }
-        // 简繁转换后可能出现"同一个词但不同编码"导致的重复（如简繁同形字），
-        // 用 Set 去重并保留首次出现的候选（即原排序靠前的）
-        var seen = Set<String>()
-        transformed = transformed.filter { seen.insert($0.text).inserted }
-        return (transformed, hasNext)
+        return (candidates, hasNext)
     }
 
     static let shared = Fire()

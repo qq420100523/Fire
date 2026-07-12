@@ -33,7 +33,6 @@ struct GeneralPane: View {
     @Default(.showInputModeStatus) private var showInputModeStatus
     @Default(.enableWhitespaceBetweenZhEn) private var enableWhitespaceBetweenZhEn
     @Default(.spellingScheme) private var spellingScheme
-    @Default(.chineseOutputMode) private var chineseOutputMode
     @Default(.enableExactMatch) private var enableExactMatch
     @Default(.celebrationEffect) private var celebrationEffect
     @Default(.hotkeyModifier) private var hotkeyModifier
@@ -133,14 +132,6 @@ struct GeneralPane: View {
                     }
                 }
                 Toggle("显示生僻字", isOn: $enableGBK)
-                LabeledContent("转换简繁输出") {
-                    Picker("", selection: $chineseOutputMode) {
-                        Text("不转换").tag(ChineseOutputMode.off)
-                        Text("简转繁").tag(ChineseOutputMode.simplifiedToTraditional)
-                        Text("繁转简").tag(ChineseOutputMode.traditionalToSimplified)
-                    }
-                    .labelsHidden()
-                }
                 LabeledContent("二三候选词额外选择键") {
                     Picker("", selection: $extraCandidateSelectKeys) {
                         Text("禁用").tag(ExtraCandidateSelectKeys.disabled)

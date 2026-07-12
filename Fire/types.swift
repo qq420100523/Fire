@@ -38,13 +38,6 @@ enum CandidateHintMode: String, Codable, Defaults.Serializable {
     case pinyin     // 显示拼音
 }
 
-// 中文输出模式：控制候选词的简繁转换
-enum ChineseOutputMode: String, Codable, Defaults.Serializable {
-    case off                        // 不转换
-    case simplifiedToTraditional    // 简转繁
-    case traditionalToSimplified    // 繁转简
-}
-
 enum InputModeTipWindowType: Int, Decodable, Encodable, Defaults.Serializable {
     case followInput
     case centerScreen
