@@ -91,22 +91,21 @@ class Fire: NSObject {
             return ([candidate], false)
         }
         let (candidates, hasNext) = DictManager.shared.getCandidates(query: origin, page: page)
-        // 根据用户设置的输出模式（简体/繁体）对候选词进行实时简繁转换
+        // 根据用户设置的输出模式对候选词进行实时简繁转换
         // 使用 CFStringTransform 系统 API 转换，支持 "Hans-Hant"（简→繁）和 "Hant-Hans"（繁→简）
         let chineseOutputMode = Defaults[.chineseOutputMode]
+        // 不转换时直接返回，跳过转换和去重开销
+        guard chineseOutputMode != .off else {
+            return (candidates, hasNext)
+        }
+        // 使用 CFStringTransform 系统 API 实时简繁转换
+        let transform: String = chineseOutputMode == .simplifiedToTraditional
+            ? "Hans-Hant"  // 简→繁
+            : "Hant-Hans"  // 繁→简
         var transformed = candidates.map { (candidate) -> Candidate in
-            let text: String
-            if chineseOutputMode == .traditional {
-                let mutableStr = NSMutableString(string: candidate.text)
-                CFStringTransform(mutableStr, nil, "Hans-Hant" as CFString, false)
-                text = mutableStr as String
-            } else if chineseOutputMode == .simplified {
-                let mutableStr = NSMutableString(string: candidate.text)
-                CFStringTransform(mutableStr, nil, "Hant-Hans" as CFString, false)
-                text = mutableStr as String
-            } else {
-                text = candidate.text
-            }
+            let mutableStr = NSMutableString(string: candidate.text)
+            CFStringTransform(mutableStr, nil, transform as CFString, false)
+            let text = mutableStr as String
             // 同时传递拆字(spelling)和拼音(pinyin)数据，供候选提示模式使用
             return Candidate(code: candidate.code, text: text, type: candidate.type,
                               spelling: candidate.spelling, pinyin: candidate.pinyin)

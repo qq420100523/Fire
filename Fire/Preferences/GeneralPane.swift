@@ -133,10 +133,14 @@ struct GeneralPane: View {
                     }
                 }
                 Toggle("显示生僻字", isOn: $enableGBK)
-                Toggle("输出繁体", isOn: Binding(
-                    get: { chineseOutputMode == .traditional },
-                    set: { chineseOutputMode = $0 ? .traditional : .simplified }
-                ))
+                LabeledContent("转换简繁输出") {
+                    Picker("", selection: $chineseOutputMode) {
+                        Text("不转换").tag(ChineseOutputMode.off)
+                        Text("简转繁").tag(ChineseOutputMode.simplifiedToTraditional)
+                        Text("繁转简").tag(ChineseOutputMode.traditionalToSimplified)
+                    }
+                    .labelsHidden()
+                }
                 LabeledContent("二三候选词额外选择键") {
                     Picker("", selection: $extraCandidateSelectKeys) {
                         Text("禁用").tag(ExtraCandidateSelectKeys.disabled)
